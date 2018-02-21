@@ -26,10 +26,17 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
+
+Adafruit_BME280 bme; 
+
+
 // Update these with values suitable for your network.
 
-const char* ssid = "....";
-const char* password = ".....";
+const char* ssid = "noaccess-keller";
+const char* password = "halloweltsst0";
 const char* mqtt_server = "iot.eclipse.org";
 
 WiFiClient espClient;
@@ -40,6 +47,21 @@ long lastMsg = 0;
 void setup() {
   
   Serial.begin(115200);
+
+  delay(10);
+  Wire.begin(0, 2);
+
+   bool status;
+    
+    // default settings
+    // (you can also pass in a Wire library object like &Wire2)
+    status = bme.begin();  
+    if (!status) {
+        Serial.println("Could not find a valid BME280 sensor, check wiring!");
+        while (1);
+    }
+    
+  
   setup_wifi();
   client.setServer(mqtt_server, 1883);
 }
@@ -85,9 +107,9 @@ void reconnect() {
 }
 
 void sendMessage() {
-  double tempC=23.0;
-  double humidity=50;
-  double pressure=1023.0;
+  double tempC=bme.readTemperature();
+  double humidity=bme.readHumidity();
+  double pressure=bme.readPressure() / 100.0F;
 
   String jsonString = "{\"@c\": \".BME280\",\"tempC\":"+String(tempC)+",\"humidity\":" + String(humidity) + ", \"pressure\": "+String(pressure)+", \"device\": \"Group1\"}";
 
@@ -95,7 +117,7 @@ void sendMessage() {
   jsonString.toCharArray(charBuf, jsonString.length() + 1);
 
 
-  client.publish("t-h.de/sensor", charBuf);
+  client.publish("t-h.de/bme280", charBuf);
 }
 
 void loop() {
