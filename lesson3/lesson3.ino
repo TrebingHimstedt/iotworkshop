@@ -35,8 +35,8 @@ Adafruit_BME280 bme;
 
 // Update these with values suitable for your network.
 
-const char* ssid = "noaccess-keller";
-const char* password = "halloweltsst0";
+const char* ssid = "........";
+const char* password = "........";
 const char* mqtt_server = "iot.eclipse.org";
 
 WiFiClient espClient;
